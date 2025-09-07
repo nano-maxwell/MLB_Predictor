@@ -43,7 +43,7 @@ else:
     X = today.drop(columns=["home_team", "away_team", "home_starter", "away_starter", "target", "date", "home_score", "away_score"])
     X_scaled = scaler.transform(X)
 
-    col_width = [25, 25, 25, 7, 7]
+    col_width = [50, 50, 25, 7, 7]
     total_width = sum(col_width) + len(col_width) + 1  # accounting for separators
 
     # Print header with box-drawing characters
@@ -56,11 +56,13 @@ else:
     for idx, game in today.iterrows():
         home_team = today["home_team"][idx]
         away_team = today["away_team"][idx]
+        home_starter = str(today["home_starter"][idx]) if pd.notna(today["home_starter"][idx]) else "TBD"
+        away_starter = str(today["away_starter"][idx]) if pd.notna(today["away_starter"][idx]) else "TBD"
 
         prob = model.predict_proba(X_scaled)[:, -1][idx]
         winner = home_team if prob >= 0.5 else away_team
         win_prob = prob if winner == home_team else 1 - prob
 
-        print(f"║ {home_team:{col_width[0]}} {away_team:{col_width[1]}} {winner:{col_width[2]}} {win_prob*100:{col_width[3]-1}.1f}% {prob_to_american(win_prob):{col_width[4]}} ║")
+        print(f"║ {(home_team + " (" + home_starter + ")"):{col_width[0]}} {(away_team  + " (" + away_starter + ")"):{col_width[1]}} {winner:{col_width[2]}} {win_prob*100:{col_width[3]-1}.1f}% {prob_to_american(win_prob):{col_width[4]}} ║")
 
     print("╚" + "═"*total_width + "╝")
